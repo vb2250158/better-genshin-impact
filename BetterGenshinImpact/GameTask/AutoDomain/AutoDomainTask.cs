@@ -1366,6 +1366,8 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
         if (textListInPrompt.Any(t => Regex.IsMatch(t.Text, insufficientCountString, RegexOptions.IgnoreCase) || Regex.IsMatch(t.Text, replenishResinString, RegexOptions.IgnoreCase)))
         {
             // 没有原粹树脂，直接退出秘境
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra2, "domain-resin-exhausted", "AutoDomainTask.GettingTreasure", new { resinExhausted = true });
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(_taskParam.SpecifyResinUse ? "unknown" : "completed", "official_resin_exhausted", "AutoDomainTask.GettingTreasure");
             Logger.LogInformation("自动秘境：原粹树脂已用尽，退出秘境");
             await ExitDomain();
             return false;
@@ -1384,6 +1386,8 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
 
                 if (resinStatus is { CondensedResinCount: <= 0, OriginalResinCount: < 20 })
                 {
+                    BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra3, "domain-resin-exhausted", "AutoDomainTask.GettingTreasure", new { resinStatus.CondensedResinCount, resinStatus.OriginalResinCount });
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_resin_exhausted", "AutoDomainTask.GettingTreasure");
                     Logger.LogWarning("树脂不足");
                     await ExitDomain();
                     return false;
@@ -1403,6 +1407,7 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
 
                 if (!resinUsed)
                 {
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("unknown", "official_resin_or_ocr_ambiguous", "AutoDomainTask.GettingTreasure");
                     Logger.LogWarning("自动秘境：未找到可用的树脂，可能是{Msg1} 或者 {Msg2}。", "树脂不足", "OCR 识别失败");
                     await ExitDomain();
                     return false;
@@ -1464,6 +1469,7 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
                 if (successCount == 0)
                 {
                     // 没有找到对应的树脂
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("unknown", "official_configured_resin_target_not_met", "AutoDomainTask.GettingTreasure");
                     Logger.LogWarning("自动秘境：指定树脂领取次数时，当前可用树脂选项无法满足配置。你可能设置的刷取次数过多！退出秘境。");
                     Logger.LogInformation("当前刷取情况：{ResinList}", string.Join(", ", _resinPriorityListWhenSpecifyUse.Select(o => $"{o.Name}({o.MaxCount - o.RemainCount}/{o.MaxCount})")));
                     await ExitDomain();
@@ -1495,6 +1501,8 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
                     var exitRectArea = ra.Find(RecognitionAssets.Get("AutoFight", "Exit", ra));
                     if (!exitRectArea.IsEmpty())
                     {
+                        BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra, "domain-final-round-result", "AutoDomainTask.GettingTreasure", new { isLastTurn, exitButtonExists = true });
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_final_resin_round_result", "AutoDomainTask.GettingTreasure");
                         exitRectArea.Click();
                         return false;
                     }
@@ -1583,6 +1591,7 @@ public partial class AutoDomainTask : ISoloTask<Dictionary<string, int>>
             using var exitRegion = capture.Find(RecognitionAssets.Get("AutoFight", "Exit", capture));
             if (exitRegion.IsExist())
             {
+                BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(capture, "domain-reward-result", "AutoDomainTask.WaitForRewardResultReady", new { exitButtonExists = true }, reward: true);
                 return true;
             }
             await Delay(300, _ct);

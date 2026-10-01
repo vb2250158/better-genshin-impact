@@ -127,9 +127,17 @@ public class AutoLeyLineOutcropTask : ISoloTask
             {
                 await RecheckResinAndContinue();
             }
+            if (_currentRunTimes >= _taskParam.Count)
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_ley_line_run_count_target_met", "AutoLeyLineOutcropTask.Start", new { completedCount = _currentRunTimes, target = _taskParam.Count });
+            else
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("unknown", "official_ley_line_run_count_target_not_met", "AutoLeyLineOutcropTask.Start", new { completedCount = _currentRunTimes, target = _taskParam.Count });
         }
         catch (Exception e) when (e is NormalEndException or TaskCanceledException)
         {
+            if (ct.IsCancellationRequested)
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("cancelled", "official_cancellation_requested", "AutoLeyLineOutcropTask.Start");
+            else
+                BetterGenshinImpact.Core.Observation.YeYuObservation.NormalEndObserved(e, "AutoLeyLineOutcropTask.Start");
             Logger.LogInformation("任务结束：{Msg}", e.Message);
         }
         catch (Exception e)
@@ -1645,6 +1653,7 @@ public class AutoLeyLineOutcropTask : ISoloTask
         }
 
         await Delay(1200, _ct);
+        BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("ley-line-reward-result", "AutoLeyLineOutcropTask.AttemptReward", "获得", "点击空白区域继续");
         await EnsureExitRewardPage();
         return true;
     }

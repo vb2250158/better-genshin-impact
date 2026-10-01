@@ -176,6 +176,10 @@ public class ImageRegion : Region
                     }
 
                     var match = MatchTemplateHelper.FindBestMatch(roi, effectiveTemplate, ro.TemplateMatchMode, effectiveMask, ro.Threshold);
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveTemplate(roi, ro, effectiveRegionOfInterest,
+                        effectiveTemplate.Width, effectiveTemplate.Height, match is { } observedMatch
+                            ? new[] { (new Rect(observedMatch.Location, new OpenCvSharp.Size(effectiveTemplate.Width, effectiveTemplate.Height)), observedMatch.Score) }
+                            : Array.Empty<(Rect, double)>());
                     if (match is { } bestMatch)
                     {
                         var newRa = Derive(bestMatch.Location.X + effectiveRegionOfInterest.X,
@@ -238,8 +242,8 @@ public class ImageRegion : Region
                 : null;
             var roi = ownedRoi ?? SrcMat;
 
+            using var inputObservation = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginImageRegionOcr();
             var result = OcrFactory.Paddle.OcrResult(roi);
-            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(SrcMat, ro, result, effectiveRegionOfInterest);
             var text = StringUtils.RemoveAllSpace(result.Text);
             text = ApplyTextReplacements(text, ro.ReplaceDictionary);
 
@@ -277,6 +281,7 @@ public class ImageRegion : Region
                 && successRegexCount == ro.RegexMatchText.Count
                 && (ro.OneContainMatchText.Count == 0 || successOneContain))
             {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(roi, ro, result, effectiveRegionOfInterest, matched: true);
                 var newRa = Derive(effectiveRegionOfInterest);
                 if (ro.DrawOnWindow && !string.IsNullOrEmpty(ro.Name))
                 {
@@ -292,6 +297,7 @@ public class ImageRegion : Region
             }
             else
             {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(roi, ro, result, effectiveRegionOfInterest, matched: false);
                 if (ro.DrawOnWindow && !string.IsNullOrEmpty(ro.Name))
                 {
                     drawContent.RemoveRect(ro.Name);
@@ -327,7 +333,9 @@ public class ImageRegion : Region
 
                 Cv2.InRange(roi, ro.LowerColor, ro.UpperColor, roi);
             }
+            using var inputObservation = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginImageRegionOcr();
             var result = OcrFactory.Paddle.OcrResult(roi);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(roi, ro, result, effectiveRegionOfInterest);
             var text = StringUtils.RemoveAllSpace(result.Text);
             text = ApplyTextReplacements(text, ro.ReplaceDictionary);
 
@@ -436,6 +444,9 @@ public class ImageRegion : Region
 
                     var matches = MatchTemplateHelper.FindMatches(roi, effectiveTemplate, ro.TemplateMatchMode,
                         effectiveMask, ro.Threshold, ro.MaxMatchCount);
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveTemplate(roi, ro, effectiveRegionOfInterest,
+                        effectiveTemplate.Width, effectiveTemplate.Height, matches.Select(m =>
+                            (new Rect(m.Location, new OpenCvSharp.Size(effectiveTemplate.Width, effectiveTemplate.Height)), m.Score)));
                     if (matches.Count > 0)
                     {
                         var resRaList = matches.Select(match =>
@@ -501,7 +512,9 @@ public class ImageRegion : Region
                 : null;
             var roi = ownedRoi ?? SrcMat;
 
+            using var inputObservation = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginImageRegionOcr();
             var result = OcrFactory.Paddle.OcrResult(roi);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(roi, ro, result, effectiveRegionOfInterest);
             var resRaList = new List<Region>();
             foreach (var ocrRegion in result.Regions)
             {

@@ -1,67 +1,61 @@
-# YeYu passive observation bridge
+# YeYu official observation bridge v2
 
-This fork is based on official BetterGI 0.66.0, commit
-`0af68c28f6b0e714d5304625ce644736d508022e`. The observer bridge version is
-`0.66.0-yeyu.1` (assembly metadata `YeYuBridgeVersion`). BetterGI's official
-Version and InformationalVersion remain unchanged, preserving its update and
-cache semantics. This is a source-built fork, not an official release binary.
+Official BetterGI 0.66.0 base: `0af68c28f6b0e714d5304625ce644736d508022e`.
+Optional bridge assembly metadata: `YeYuBridgeVersion=0.66.0-yeyu.2`. The official
+Version and InformationalVersion remain 0.66.0. This is a source-built fork under
+the existing GPL-3.0 license; retain LICENSE and corresponding fork source.
 
-The existing GPL-3.0 license applies. Distribution must retain LICENSE and make
-the corresponding fork source available. No executable patching is used.
+The [scope and event contract](yeyu-observation-v2.md) describes explicit opt-in,
+UID confirmation, cancellation and recognition artifacts. V2 removes the V1
+mouse-boundary captures and all delayed capture work. V1 artifacts retain their
+historical action-image semantics; they are never relabeled as recognition input.
+PostMessageSimulator, MouseEventSimulator and WindowsInputMessageDispatcher are
+restored to the official source. Normal offline/manual use installs no observer.
 
-The bridge is disabled unless both `BGI_YEYU_OBSERVATION_DIR` and
-`BGI_YEYU_SCOPE_FILE` are supplied. The scope is UTF-8 JSON:
+Transport failures are fail-open. The official native input, task order, return
+values, exception objects, retries and resource decisions remain intact. Requested
+invalid scopes and mismatching/unreadable account UID refuse game task execution
+at the independent authorization boundary. Named accounts never discover an
+arbitrary current UID. No credential, account switch, extra page navigation or
+reward selection is added.
 
-```json
-{"schemaVersion":1,"gameId":"Genshin","runId":"00000000-0000-4000-8000-000000000001","runAttemptId":"00000000-0000-4000-8000-000000000002","accountId":"00000000-0000-4000-8000-000000000003","gameDay":"2000-01-01","taskOperations":{"official-task-id":"claim-mail","@check-rewards":"claim-daily-rewards"}}
-```
+ImageRegion OCR/template and direct Paddle OCR export actual inputs and results.
+OCR source ROI is separate from boxes in the archived pixel space. Frame capture
+time is unknown and remains null. Sampling is bounded (two ordinary plus six
+dedicated images per operation); image/log write failures do not fail game tasks.
+New read-only postcondition reports use a single official capture/OCR at the page
+the official task still has open: no extra input, wait, retry or page opening.
 
-`events.jsonl` and `upstream-log.jsonl` preserve scope and official task ID/name.
-PNG artifacts are referenced by relative path and SHA256 in `frames/`.
-Unknown method returns stay unknown. Explicit exception, cancellation and skip
-branches are recorded without changing their original handling. Logger data is
-retained through an added Serilog sink. Observer failures are fail-open.
-An observed exception may be recovered by an official retry. It is therefore
-an exception fact with `terminalConfirmed=false`, never a fabricated failure
-terminal. Only an explicit skip branch is exported with a skipped outcome;
-there is currently no success/failure terminal mapping.
+Explicit official count/resource/exception/skip branches export terminals.
+Plain return, `DragonEnd.Success`, reward button clicks and ambiguous
+"unfinished or already claimed" branches never become completed terminals.
+Exceptions inside official retries remain diagnostic facts; only exhausted or
+propagated task exception boundaries are failures.
 
-Actual mouse dispatch boundaries collect independent BitBlt frames. A click
-exports before, immediate after and a scheduled 100 ms frame, with real request
-and capture timestamps, delay and later-input coverage. A drag exports only its
-release frame. Delayed work is tracked and drained with a bounded exit wait.
-Input arrays with multiple clicks (such as one SendInput double-click batch)
-cannot expose intermediate physical boundaries and report missing evidence.
-Side buttons and input outside the three instrumented APIs are not covered.
+The daily reward composite has distinct encounter points, Catherine, expeditions,
+battle-pass points and battle-pass rewards facts. The final commission status
+checks only commission/Catherine status. It cannot prove all composite rewards.
+Only all six required source facts together can emit a late operation_terminal;
+that report retains the original account, RunAttempt, game day and Todo attempt.
+Postcondition anchors are candidate reporting rules; Manager must independently
+re-read the same scoped image/hash using a real recognizer and must validate each
+page rule with real positive/negative samples before acceptance. Synthetic replay
+or image presence does not prove game completion.
 
-The account in scope is a declaration, never a verified in-game identity.
-`accountIdentityConfirmed` remains false. The evidence scopes in the official
-daily commission check export exact source pixels, text and boxes for every
-OcrMatch call in that scope, including helper recognition. Their scope labels do
-not prove those helper calls are reward completion. Other reward types lack
-dedicated verification rules. No observation is a Manager reward-verification pass.
-The observer sends no input and makes no game decisions or retries.
-
-The separate probe never references BetterGI/App and does not enumerate game
-windows, start capture, send input, or register protocols:
-
-```powershell
-dotnet publish Tools/BetterGI.YeYuProbe/BetterGI.YeYuProbe.csproj -c Release -r win-x64 --self-contained true
-BetterGI.YeYuProbe.exe <installation-directory> <report.json>
-```
-
-It checks version, the installation's `yeyu-source-manifest.json`, required
-resources, OpenCV encoding/decoding, capture-library construction/disposal, and
-CPU ONNX model loading. A passing probe proves installation dependencies only.
-
-Offline replay compiles the production observer source with an explicit capture
-test double, without App or the real input dispatcher:
+The standalone installation probe never references BetterGI/App, starts capture,
+sends input or registers a protocol. Its dependency success proves installation,
+not game success. The standalone config exporter references the official model
+and shared original eight-task initializer without instantiating App, Host or a
+viewmodel. It uses PascalCase official JSON and FileMode.CreateNew:
 
 ```powershell
-dotnet build Tools/BetterGI.YeYuObservationReplay/BetterGI.YeYuObservationReplay.csproj -c Release
-dotnet Tools/BetterGI.YeYuObservationReplay/bin/Release/net8.0-windows10.0.22621.0/BetterGI.YeYuObservationReplay.dll enabled <fresh-test-directory>
+BetterGI.YeYuConfigExport.exe --name YeYu-Genshin --output C:/absolute/new-config.json
 ```
 
-Run `off`, `invalid-scope`, `invalid-uuid`, `invalid-day`, and `write-failure` in separate fresh directories and
-processes. Replay checks transport, fail-open behavior and capture sequencing.
-Its generated images are synthetic and do not prove real-game capture accuracy.
+Offline replay links production YeYuObservation.cs with explicit recognition
+result doubles. There is no fake capture class, game App or native dispatcher.
+Scenarios: off, invalid-scope, invalid-uuid, invalid-day, named-without-uid,
+write-failure, enabled, mismatch and composite. It validates exact supplied pixel copies,
+hashes, coordinate space, bounded polling, unknown returns, recovered exceptions,
+explicit terminals, UID discovery/mismatch, cancellation, and no action images.
+Generated synthetic images never count as real-game evidence.

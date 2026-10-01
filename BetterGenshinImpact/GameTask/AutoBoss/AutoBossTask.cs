@@ -158,6 +158,7 @@ public class AutoBossTask : ISoloTask<Dictionary<string, int>>
             //3.树脂不足则退出
             if (!await EnsureResinBeforeRound())
             {
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(_taskParam.SpecifyRunCount ? "unknown" : "completed", "official_resin_exhausted_or_supplement_failed", "AutoBossTask.RunBossLoop", new { successfulRewardCount = _successfulRewardCount, target = _taskParam.RunCount });
                 _logger.LogInformation("{Name}：原粹树脂不足或补充失败，结束任务", Name);
                 break;
             }
@@ -178,6 +179,7 @@ public class AutoBossTask : ISoloTask<Dictionary<string, int>>
             var rewardSuccess = await TakeReward();
             if (!rewardSuccess)
             {
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("unknown", "official_resin_or_reward_failure_ambiguous", "AutoBossTask.RunBossLoop");
                 _logger.LogInformation("{Name}：原粹树脂不足或无法领取奖励，结束任务", Name);
                 break;
             }
@@ -186,6 +188,7 @@ public class AutoBossTask : ISoloTask<Dictionary<string, int>>
             _taskParam.RewardClaimedCallback?.Invoke();
             if (!ShouldContinueBeforeRound())
             {
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_reward_count_target_met", "AutoBossTask.RunBossLoop", new { successfulRewardCount = _successfulRewardCount, target = _taskParam.RunCount });
                 break;
             }
             
@@ -1324,6 +1327,7 @@ public class AutoBossTask : ISoloTask<Dictionary<string, int>>
         }
 
         await TryRecognizeRewardResult(page);
+        BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("boss-reward-result", "AutoBossTask.TakeReward", "获得", "点击空白区域继续");
         await CloseRewardResult();
         Notify.Event("AutoBoss").Success($"{Name}奖励领取");
         return true;

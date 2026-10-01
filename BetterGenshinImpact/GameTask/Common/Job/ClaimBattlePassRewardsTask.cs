@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -45,6 +45,7 @@ public class ClaimBattlePassRewardsTask
         catch (Exception e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "ClaimBattlePassRewardsTask.Start", e is OperationCanceledException);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(e is OperationCanceledException || ct.IsCancellationRequested ? "cancelled" : "failed", "official_unrecovered_task_exception", "ClaimBattlePassRewardsTask.Start", new { exception = e.ToString() });
             Logger.LogDebug(e, "领取纪行奖励异常");
             Logger.LogError("领取纪行奖励异常: {Msg}", e.Message);
         }
@@ -61,7 +62,7 @@ public class ClaimBattlePassRewardsTask
         await Delay(1000, ct);
         GameCaptureRegion.GameRegion1080PPosClick(960, 45); // 点中间
         await Delay(500, ct);
-        await ClaimAll(ct);
+        await ClaimAll(ct, "battle-pass-points");
 
         // 最后再回到奖励页领取，若存在手动选择奖励则仅记录日志提醒
         await Delay(2500, ct); // 等待升级动画
@@ -76,7 +77,7 @@ public class ClaimBattlePassRewardsTask
         }
         GameCaptureRegion.GameRegion1080PPosClick(858, 45);
         await Delay(1500, ct);
-        await ClaimAll(ct);
+        await ClaimAll(ct, "battle-pass-rewards");
 
         // 关闭
         await _returnMainUiTask.Start(ct);
@@ -86,7 +87,7 @@ public class ClaimBattlePassRewardsTask
     /// 一键领取
     /// </summary>
     /// <returns></returns>
-    private async Task<bool> ClaimAll(CancellationToken ct)
+    private async Task<bool> ClaimAll(CancellationToken ct, string evidencePhase)
     {
         using var ra = CaptureToRectArea();
         var ocrList = ra.FindMulti(RecognitionObject.Ocr(ra.ToRect().CutRightBottom(0.3, 0.2)));
@@ -99,6 +100,8 @@ public class ClaimBattlePassRewardsTask
             using var ra2 = CaptureToRectArea();
             if (IsManualSelectionDialog(ra2))
             {
+                BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra2, evidencePhase, "ClaimBattlePassRewardsTask.ClaimAll", new { manualSelectionDialog = true }, reward: true);
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Fact(evidencePhase, "human_action_required", "ClaimBattlePassRewardsTask.ClaimAll", new { reason = "manual_reward_selection" });
                 LogManualSelectionReminder();
                 return true;
             }
@@ -108,10 +111,13 @@ public class ClaimBattlePassRewardsTask
                 TaskContext.Instance().PostMessageSimulator.KeyPress(User32.VK.VK_ESCAPE);
             }
 
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage(evidencePhase, "ClaimBattlePassRewardsTask.ClaimAll", "纪行", "已领取");
             return true;
         }
         else
         {
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra, evidencePhase, "ClaimBattlePassRewardsTask.ClaimAll", new { claimButtonFound = false }, reward: true);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact(evidencePhase, "official_no_claim_button_ambiguous", "ClaimBattlePassRewardsTask.ClaimAll");
             Logger.LogInformation("纪行：{Text}", "无需领取");
             return false;
         }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -80,7 +80,6 @@ public class CheckRewardsTask
 
     private async Task StartOriginalAsync(CancellationToken ct)
     {
-        using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
         await new ReturnMainUiTask().Start(ct);
 
         _ = await NewRetry.WaitForElementAppear(
@@ -95,6 +94,7 @@ public class CheckRewardsTask
             },ct,4,1000);
 
         // OCR识别每日是否完成
+        using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
         var done = await NewRetry.WaitForElementAppear(
             GetConfirmRa(true,_dailyRewardsClaimedLocalizedString),null,
             ct,4,500);
@@ -177,7 +177,6 @@ public class CheckRewardsTask
             }
 
             // 委托：打开冒险之证委托页识别奖励领取状态并截取左侧页签+奖励区域
-            using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward-summary");
             bool? commissionClaimed = null;
             var commissionText = "委托状态识别失败";
             try
@@ -202,6 +201,7 @@ public class CheckRewardsTask
                 }
                 else
                 {
+                    using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
                     commissionClaimed = await NewRetry.WaitForElementAppear(
                         GetConfirmRa(true, _dailyRewardsClaimedLocalizedString), null,
                         ct, 4, 500);

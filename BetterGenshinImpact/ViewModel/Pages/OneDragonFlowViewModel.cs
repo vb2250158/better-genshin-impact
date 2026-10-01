@@ -39,19 +39,7 @@ public partial class OneDragonFlowViewModel : ViewModel
 
     private readonly ScriptService _scriptService;
 
-    [ObservableProperty] private ObservableCollection<OneDragonTaskItem> _taskList =
-    [
-        new("领取邮件"),
-        new("合成树脂"),
-        // new ("每日委托"),
-        new("自动秘境"),
-        new ("自动首领讨伐"),
-        new ("自动幽境危战"),
-        new ("自动地脉花"),
-        new("领取每日奖励"),
-        new ("领取尘歌壶奖励"),
-        // new ("自动七圣召唤"),
-    ];
+    [ObservableProperty] private ObservableCollection<OneDragonTaskItem> _taskList = OneDragonTaskDefaults.Create();
 
 
     [ObservableProperty] private OneDragonTaskItem _selectedTask;
@@ -622,12 +610,16 @@ public partial class OneDragonFlowViewModel : ViewModel
         int enabledoneTaskCount = taskListCopy.Count(t => t.IsEnabled);
         _logger.LogInformation($"启用一条龙任务的数量: {enabledoneTaskCount}");
 
+        BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RequireValidScopeBeforeStart();
         await ScriptService.StartGameTask();
         if (CancellationContext.Instance.IsCancellationRequested)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.FlowTerminal("cancelled", "official_startup_cancelled", "OneDragonFlowViewModel.OnOneKeyExecute");
             _logger.LogInformation("一条龙在启动阶段被取消");
             return;
         }
+
+        BetterGenshinImpact.Core.Observation.YeYuOfficialResult.ConfirmAccountBeforeTasks();
 
         SaveConfig();
         int enabledTaskCount = taskListCopy.Count(t =>
@@ -688,6 +680,7 @@ public partial class OneDragonFlowViewModel : ViewModel
                 if (CancellationContext.Instance.Cts.IsCancellationRequested)
                 {
                     BetterGenshinImpact.Core.Observation.YeYuObservation.CancellationObserved("OneDragonFlowViewModel.OnOneKeyExecute");
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.FlowTerminal("cancelled", "official_task_cancellation", "OneDragonFlowViewModel.OnOneKeyExecute");
                     _logger.LogInformation("任务被取消，退出执行");
                     if (CancellationContext.Instance.IsManualStop is false)
                     {
@@ -709,6 +702,8 @@ public partial class OneDragonFlowViewModel : ViewModel
                 Notify.Event(NotificationEvent.DragonEnd).Success("一条龙和配置组任务结束");
             }
             _logger.LogInformation("一条龙和配置组任务结束");
+
+            BetterGenshinImpact.Core.Observation.YeYuObservation.FlowTerminal("returned", "official_one_dragon_sequence_ended", "OneDragonFlowViewModel.OnOneKeyExecute");
 
             // 执行完成后操作
             if (SelectedConfig != null && !string.IsNullOrEmpty(SelectedConfig.CompletionAction))

@@ -85,6 +85,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     catch (Exception e)
                     {
                         BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "OneDragonTaskItem.CraftResin", e is OperationCanceledException);
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(e is OperationCanceledException || CancellationContext.Instance.IsCancellationRequested ? "cancelled" : "failed", "official_craft_exception_exhausted", "OneDragonTaskItem.CraftResin", new { exception = e.ToString() });
                         TaskControl.Logger.LogError("合成树脂执行异常：" + e.Message);
                     }
                 };

@@ -42,6 +42,8 @@ public class OneKeyExpeditionTask
                         else
                         {
                             ra2.Click();
+                            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(region, "expeditions-reward-menu", "OneKeyExpeditionTask.Run", new { collectPreviouslyClicked = true, redispatchButtonExists = true, template = "AutoSkip.Re", bbox = new { x = ra2.X, y = ra2.Y, width = ra2.Width, height = ra2.Height }, score = ra2.MatchScore }, reward: true);
+                            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("expeditions", "official_collect_and_redispatch", "OneKeyExpeditionTask.Run");
                             Logger.LogInformation("探索派遣：{Text}", "再次派遣");
                         }
                     }, TimeSpan.FromSeconds(1), 3);
@@ -66,6 +68,8 @@ public class OneKeyExpeditionTask
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("expeditions", "official_exhausted_exception", "OneKeyExpeditionTask.Run", new { exception = e.ToString() });
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("failed", "official_expedition_exception", "OneKeyExpeditionTask.Run");
             Logger.LogInformation(e.Message);
         }
         finally

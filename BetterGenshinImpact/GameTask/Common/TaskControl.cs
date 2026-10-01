@@ -129,6 +129,8 @@ public class TaskControl
 
     public static void Sleep(int millisecondsTimeout, CancellationToken ct)
     {
+        BetterGenshinImpact.Core.Observation.YeYuObservation.RequestCancellationAtSafePoint(
+            () => BetterGenshinImpact.Core.Script.CancellationContext.Instance.Cancel());
         if (ct.IsCancellationRequested)
         {
             throw new NormalEndException("取消自动任务");
@@ -158,6 +160,8 @@ public class TaskControl
 
     public static async Task Delay(int millisecondsTimeout, CancellationToken ct)
     {
+        BetterGenshinImpact.Core.Observation.YeYuObservation.RequestCancellationAtSafePoint(
+            () => BetterGenshinImpact.Core.Script.CancellationContext.Instance.Cancel());
         if (ct is { IsCancellationRequested: true })
         {
             throw new NormalEndException("取消自动任务");

@@ -42,6 +42,7 @@ public class ClaimEncounterPointsRewardsTask
         catch (Exception e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "ClaimEncounterPointsRewardsTask.Start", e is OperationCanceledException);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(e is OperationCanceledException || ct.IsCancellationRequested ? "cancelled" : "failed", "official_unrecovered_task_exception", "ClaimEncounterPointsRewardsTask.Start", new { exception = e.ToString() });
             Logger.LogDebug(e, "领取长效历练点奖励异常");
             Logger.LogError("领取长效历练点奖励异常: {Msg}", e.Message);
         }
@@ -87,6 +88,7 @@ public class ClaimEncounterPointsRewardsTask
 
         if (!f1Success)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("encounter-points", "official_page_open_failed", "ClaimEncounterPointsRewardsTask.DoOnce");
             Logger.LogError("{F}未找到委托按钮,F1打开冒险之证失败", "历练点：");
             return;
         }
@@ -96,7 +98,7 @@ public class ClaimEncounterPointsRewardsTask
             // 已经领取过
             await Delay(1000, ct);
 
-            // TODO 截图并通知
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("encounter-points", "ClaimEncounterPointsRewardsTask.DoOnce", "历练点", "已领取");
             return;
         }
 
@@ -108,7 +110,7 @@ public class ClaimEncounterPointsRewardsTask
         {
             await Delay(1000, ct);
 
-            // TODO 截图并通知
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("encounter-points", "ClaimEncounterPointsRewardsTask.DoOnce", "历练点", "已领取");
         }
 
         // 关闭
@@ -128,6 +130,7 @@ public class ClaimEncounterPointsRewardsTask
         }
         else
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("encounter-points", "official_claim_button_missing_ambiguous", "ClaimEncounterPointsRewardsTask.ClickClaimBtn");
             Logger.LogInformation("{F}未找到领取历练点奖励按钮", "历练点：");
             return false;
         }

@@ -1,4 +1,4 @@
-﻿using BetterGenshinImpact.Core.Script;
+using BetterGenshinImpact.Core.Script;
 using BetterGenshinImpact.GameTask.AutoGeniusInvokation.Exception;
 
 using BetterGenshinImpact.View;
@@ -76,6 +76,8 @@ public class TaskRunner
         catch (NormalEndException e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.NormalEndObserved(e, "TaskRunner.RunCurrentAsync");
+            if (CancellationContext.Instance.IsCancellationRequested)
+                BetterGenshinImpact.Core.Observation.YeYuObservation.CancellationObserved("TaskRunner.RunCurrentAsync");
             Notify.Event(NotificationEvent.TaskCancel).Success("任务手动取消，或正常结束");
             _logger.LogInformation("任务中断:{Msg}", e.Message);
             if (RunnerContext.Instance.IsContinuousRunGroup)
@@ -87,6 +89,7 @@ public class TaskRunner
         catch (OperationCanceledException e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "TaskRunner.RunCurrentAsync", cancelled: true);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("cancelled", "official_cancelled", "TaskRunner.RunCurrentAsync", new { exception = e.ToString() });
             Notify.Event(NotificationEvent.TaskCancel).Success("任务被手动取消");
             _logger.LogInformation("任务中断:{Msg}", "任务被取消");
             if (RunnerContext.Instance.IsContinuousRunGroup)
@@ -98,6 +101,7 @@ public class TaskRunner
         catch (Exception e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "TaskRunner.RunCurrentAsync");
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("failed", "official_task_runner_exception", "TaskRunner.RunCurrentAsync", new { exception = e.ToString() });
             Notify.Event(NotificationEvent.TaskError).Error("任务执行异常", e);
             _logger.LogError(e.Message);
             _logger.LogDebug(e.StackTrace);

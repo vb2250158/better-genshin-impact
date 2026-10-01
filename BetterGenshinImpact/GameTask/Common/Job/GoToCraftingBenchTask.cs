@@ -171,6 +171,8 @@ public class GoToCraftingBenchTask
                 }
                 else
                 {
+                    BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra, "craft-retention-condition", "GoToCraftingBenchTask.GoCraftResinOnce", new { craftsNeeded, fragileResinCount, condensedResinCount, minResinToKeep });
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("official_resin_retention_condition_met", "GoToCraftingBenchTask.GoCraftResinOnce");
                     Logger.LogInformation("无需合成浓缩树脂");
                 }
             }
@@ -184,11 +186,15 @@ public class GoToCraftingBenchTask
                 Bv.ClickBlackConfirmButton(confirmCapture);
             }
             await Delay(1300, ct);
+            if (BetterGenshinImpact.Core.Observation.YeYuOfficialResult.KeyPage("craft-result", "GoToCraftingBenchTask.GoCraftResinOnce", "获得", "浓缩树脂"))
+                BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_crafted_item_postcondition_confirmed", "GoToCraftingBenchTask.GoCraftResinOnce");
             // 直接ESC退出即可
             Simulation.SendInput.Keyboard.KeyPress(User32.VK.VK_ESCAPE);
         }
         else
         {
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra, "craft-recipe-unavailable", "GoToCraftingBenchTask.GoCraftResinOnce", new { recipeExists = false });
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("official_condensed_resin_recipe_unavailable", "GoToCraftingBenchTask.GoCraftResinOnce");
             Logger.LogInformation("无需合成浓缩树脂");
         }
 

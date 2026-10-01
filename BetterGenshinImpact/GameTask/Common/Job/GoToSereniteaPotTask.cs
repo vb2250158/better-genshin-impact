@@ -67,6 +67,7 @@ internal class GoToSereniteaPotTask
         catch (Exception e)
         {
             BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "GoToSereniteaPotTask.Start", e is OperationCanceledException);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(e is OperationCanceledException || ct.IsCancellationRequested ? "cancelled" : "failed", "official_unrecovered_task_exception", "GoToSereniteaPotTask.Start", new { exception = e.ToString() });
             Logger.LogDebug(e, "领取尘歌壶奖励异常");
             Logger.LogError("领取尘歌壶奖励异常: {Msg}", e.Message);
         }
@@ -449,6 +450,8 @@ internal class GoToSereniteaPotTask
                 if (numericPart == 0)
                 {
                     Logger.LogWarning("领取尘歌壶奖励:{text}", "没有角色可领取好感"); //存好感
+                    BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(getAare, "pot-no-companion-eligible", "GoToSereniteaPotTask.GetReward", new { eligibleCompanionCount = numericPart }, reward: true);
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("pot-companionship", "official_no_eligible_companion", "GoToSereniteaPotTask.GetReward");
                     shouldClick = false;
                 }
             }
@@ -472,6 +475,8 @@ internal class GoToSereniteaPotTask
                 await Delay(200, ct);
             }
 
+            if (shouldClick)
+                BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("pot-companionship", "GoToSereniteaPotTask.GetReward", "好感", "获得");
             using var ra1 = CaptureToRectArea();
             if (ra1.Find(ElementRecognition.Get("SereniteapotPageClose", ra1), a => a.Click()).IsExist())
             {
@@ -481,6 +486,7 @@ internal class GoToSereniteaPotTask
             using var ra2 = CaptureToRectArea();
             ra2.Find(ElementRecognition.Get("SereniteaPotMoney", ra2), a => a.Click());
             await Delay(500, ct);
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("pot-currency", "GoToSereniteaPotTask.GetReward", "洞天宝钱", "获得");
             using var ra3 = CaptureToRectArea();
             ra3.Find(ElementRecognition.Get("SereniteapotPageClose", ra3), a => a.Click());
             await Delay(500, ct);
@@ -648,6 +654,7 @@ internal class GoToSereniteaPotTask
         }
         if (!success)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("failed", "official_serenitea_entry_failed", "GoToSereniteaPotTask.DoOnce");
             await Finished(ct);
             return;
         }
@@ -657,12 +664,19 @@ internal class GoToSereniteaPotTask
         // 领取奖励
         if (fail)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("failed", "official_ayuan_navigation_failed", "GoToSereniteaPotTask.DoOnce");
             await Finished(ct);
             return;
         }
 
         await Delay(500, ct);
         await GetReward(ct);
+        BetterGenshinImpact.Core.Observation.YeYuObservation.CompleteOperationFromFacts(
+            "claim-serenitea-pot", "official_serenitea_postconditions_confirmed", "GoToSereniteaPotTask.DoOnce",
+            new Dictionary<string, string[]> {
+                ["pot-companionship"] = new[] { "postcondition_anchors_observed", "official_no_eligible_companion" },
+                ["pot-currency"] = new[] { "postcondition_anchors_observed" }
+            });
 
         // 收尾操作 - 退出到主页面 - 传送到提瓦特大陆
         await Finished(ct);

@@ -58,12 +58,12 @@ Check("source_manifest", () => {
     var manifest = JObject.Parse(File.ReadAllText(path));
     if (manifest["schemaVersion"]?.Value<int>() != 1 ||
         manifest["upstreamRelease"]?.Value<string>() != "0.66.0" ||
-        manifest["observationVersion"]?.Value<string>() != "0.66.0-yeyu.1" ||
+        manifest["observationVersion"]?.Value<string>() != "0.66.0-yeyu.2" ||
         manifest["baseCommit"]?.Value<string>() != "0af68c28f6b0e714d5304625ce644736d508022e" ||
         manifest["license"]?.Value<string>() != "GPL-3.0")
         throw new InvalidDataException("Installed source manifest does not match audited source/bridge contract");
     return new { manifest, resource = Resource("yeyu-source-manifest.json"),
-        observerBridgeVersion = "0.66.0-yeyu.1",
+        observerBridgeVersion = "0.66.0-yeyu.2",
         note = "Manifest declaration; executable version and resource hashes checked independently" };
 });
 Check("opencv_native", () => {

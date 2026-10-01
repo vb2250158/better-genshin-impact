@@ -90,6 +90,7 @@ public class GoToAdventurersGuildTask
         var res = await _chooseTalkOptionTask.SingleSelectText(this.dailyLocalizedString, ct, 10, true);
         if (res == TalkOptionRes.FoundAndClick)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("catherine", "official_dialogue_selected", "GoToAdventurersGuildTask.DoOnce");
             Logger.LogInformation("▶ {Text}", "领取『每日委托』奖励！");
             await Delay(800, ct);
             
@@ -100,6 +101,7 @@ public class GoToAdventurersGuildTask
                 Logger.LogInformation("存在提示并确认");
             }
             
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.RewardPage("catherine", "GoToAdventurersGuildTask.DoOnce", "获得", "原石");
             await _chooseTalkOptionTask.SelectLastOptionUntilEnd(ct, null, 3); // 点几下
             await Bv.WaitUntilFound(ElementRecognition.Get("PaimonMenu"), ct);
             await Delay(500, ct);
@@ -116,10 +118,12 @@ public class GoToAdventurersGuildTask
         }
         else if (res == TalkOptionRes.FoundButNotOrange)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("catherine", "official_unfinished_or_already_claimed_ambiguous", "GoToAdventurersGuildTask.DoOnce");
             Logger.LogInformation("▶ {Text} 未完成或者已领取", "领取『每日委托』奖励");
         }
         else
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("catherine", "official_option_missing", "GoToAdventurersGuildTask.DoOnce");
             Logger.LogWarning("▶ 未找到 {Text} 选项", "领取『每日委托』奖励");
         }
 
@@ -132,10 +136,12 @@ public class GoToAdventurersGuildTask
         }
         else if (res == TalkOptionRes.FoundButNotOrange)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("expeditions", "official_unfinished_or_already_claimed_ambiguous", "GoToAdventurersGuildTask.DoOnce");
             Logger.LogInformation("▶ {Text} 未探索完成或已领取", "探索派遣");
         }
         else
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Fact("expeditions", "official_option_missing", "GoToAdventurersGuildTask.DoOnce");
             Logger.LogWarning("▶ 未找到 {Text} 选项", "探索派遣");
         }
 

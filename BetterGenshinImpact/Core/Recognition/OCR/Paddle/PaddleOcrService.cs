@@ -295,6 +295,7 @@ public class PaddleOcrService : IOcrService, IDisposable
         var str = _localRecModel.Run(mat).Text;
         var time = Stopwatch.GetElapsedTime(startTime);
         // Debug.WriteLine($"PaddleOcrWithoutDetector 耗时 {time.TotalMilliseconds}ms 结果: {str}");
+        BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveTextPrimitive(mat, str, "PaddleOcrService.OcrWithoutDetector");
         return str;
     }
 
@@ -304,6 +305,7 @@ public class PaddleOcrService : IOcrService, IDisposable
         var result = RunAll(mat);
         var time = Stopwatch.GetElapsedTime(startTime);
         // Debug.WriteLine($"PaddleOcr 耗时 {time.TotalMilliseconds}ms 结果: {result.Text}");
+        BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcrPrimitive(mat, result, "PaddleOcrService.OcrResult");
         return result;
     }
 

@@ -165,10 +165,12 @@ public class AutoStygianOnslaughtTask : StateMachineBase<StygianState, BvPage>, 
         }
         catch (TaskCanceledException)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("cancelled", "official_cancellation_requested", "AutoStygianOnslaughtTask.Start");
             // do nothing
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(e is OperationCanceledException || ct.IsCancellationRequested ? "cancelled" : "failed", "official_unrecovered_stygian_exception", "AutoStygianOnslaughtTask.Start", new { exception = e.ToString() });
             Logger.LogInformation(e.Message);
         }
 
@@ -195,6 +197,7 @@ public class AutoStygianOnslaughtTask : StateMachineBase<StygianState, BvPage>, 
 
         if (CurrentState == StygianState.MainWorld)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("official_stygian_event_ended", "AutoStygianOnslaughtTask.DoDomain");
             Logger.LogInformation($"{Name}：活动已结束，已返回主界面");
             return false;
         }
@@ -681,6 +684,8 @@ public class AutoStygianOnslaughtTask : StateMachineBase<StygianState, BvPage>, 
         // 检查是否无树脂
         if (textList.Any(t => t.Text.Contains("数量不足") || t.Text.Contains("补充原粹树脂")))
         {
+            BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra, "stygian-resin-exhausted", "AutoStygianOnslaughtTask.HandleRewardStateMachine", new { resinExhausted = true });
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal(_taskParam.SpecifyResinUse ? "unknown" : "completed", "official_stygian_resin_exhausted", "AutoStygianOnslaughtTask.HandleRewardStateMachine");
             Logger.LogInformation("原粹树脂已用尽");
             return false;
         }
@@ -702,6 +707,8 @@ public class AutoStygianOnslaughtTask : StateMachineBase<StygianState, BvPage>, 
                 var exitBtn = ra2.Find(RecognitionAssets.Get("AutoFight", "Exit", ra2));
                 if (!exitBtn.IsEmpty())
                 {
+                    BetterGenshinImpact.Core.Observation.YeYuOfficialResult.Decision(ra2, "stygian-final-round-result", "AutoStygianOnslaughtTask.HandleRewardStateMachine", new { isLastTurn, exitButtonExists = true });
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.Terminal("completed", "official_stygian_final_resin_round_result", "AutoStygianOnslaughtTask.HandleRewardStateMachine");
                     exitBtn.Click();
                     return false;
                 }
