@@ -84,6 +84,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     }
                     catch (Exception e)
                     {
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "OneDragonTaskItem.CraftResin", e is OperationCanceledException);
                         TaskControl.Logger.LogError("合成树脂执行异常：" + e.Message);
                     }
                 };
@@ -100,6 +101,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     if (taskSettingsPageViewModel!.GetFightStrategy(out var path))
                     {
                         TaskControl.Logger.LogError("自动秘境战斗策略{Msg}，跳过", "未配置");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("fight_strategy_missing", "OneDragonTaskItem.AutoDomain");
                         return;
                     }
 
@@ -107,6 +109,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     if (string.IsNullOrEmpty(domainName))
                     {
                         TaskControl.Logger.LogError("一条龙配置内{Msg}需要刷的秘境，跳过", "未选择");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("domain_unselected", "OneDragonTaskItem.AutoDomain");
                         return;
                     }
                     else
@@ -133,6 +136,7 @@ public partial class OneDragonTaskItem : ObservableObject
                         TaskControl.Logger.LogInformation(
                             "自动首领讨伐：累计成功次数已达到上限 {Limit}，跳过",
                             config.AutoBossTotalRunCountLimit);
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("boss_total_run_limit_reached", "OneDragonTaskItem.AutoBoss");
                         return;
                     }
 
@@ -145,12 +149,14 @@ public partial class OneDragonTaskItem : ObservableObject
                     if (taskSettingsPageViewModel!.GetFightStrategy(config.AutoBossStrategyName, out var path))
                     {
                         TaskControl.Logger.LogError("自动首领讨伐战斗策略{Msg}，跳过", "未配置");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("fight_strategy_missing", "OneDragonTaskItem.AutoBoss");
                         return;
                     }
 
                     if (string.IsNullOrWhiteSpace(config.AutoBossName))
                     {
                         TaskControl.Logger.LogError("一条龙配置内{Msg}需要讨伐的首领，跳过", "未选择");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("boss_unselected", "OneDragonTaskItem.AutoBoss");
                         return;
                     }
 
@@ -190,6 +196,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     if (taskSettingsPageViewModel!.GetFightStrategy(TaskContext.Instance().Config.AutoStygianOnslaughtConfig.StrategyName, out var path))
                     {
                         TaskControl.Logger.LogError("自动幽境危战战斗策略{Msg}，跳过", "未配置");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("fight_strategy_missing", "OneDragonTaskItem.AutoStygian");
                         return;
                     }
 
@@ -218,6 +225,7 @@ public partial class OneDragonTaskItem : ObservableObject
                     if (!config.ShouldRunLeyLineToday())
                     {
                         TaskControl.Logger.LogInformation("自动地脉花未在运行日期内，跳过");
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("ley_line_not_scheduled_today", "OneDragonTaskItem.AutoLeyLine");
                         return;
                     }
 

@@ -27,6 +27,7 @@ public class ClaimMailRewardsTask
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "ClaimMailRewardsTask.Start", e is OperationCanceledException);
             Logger.LogDebug(e, "领取邮件奖励异常");
             Logger.LogError("领取邮件奖励异常: {Msg}", e.Message);
         }

@@ -72,6 +72,7 @@ public class CheckRewardsTask
         }
         catch (Exception e) when (e is not NormalEndException and not OperationCanceledException)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "CheckRewardsTask.Start");
             Logger.LogDebug(e, "检查奖励并通知的任务异常");
             Logger.LogError("检查奖励并通知的任务异常: {Msg}", e.Message);
         }
@@ -79,6 +80,7 @@ public class CheckRewardsTask
 
     private async Task StartOriginalAsync(CancellationToken ct)
     {
+        using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
         await new ReturnMainUiTask().Start(ct);
 
         _ = await NewRetry.WaitForElementAppear(
@@ -96,6 +98,7 @@ public class CheckRewardsTask
         var done = await NewRetry.WaitForElementAppear(
             GetConfirmRa(true,_dailyRewardsClaimedLocalizedString),null,
             ct,4,500);
+        BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(done, "CheckRewardsTask.StartOriginalAsync");
         if (done)
         {
             Logger.LogInformation("检查每日奖励结果：{Msg}", "今日奖励已领取");
@@ -174,6 +177,7 @@ public class CheckRewardsTask
             }
 
             // 委托：打开冒险之证委托页识别奖励领取状态并截取左侧页签+奖励区域
+            using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward-summary");
             bool? commissionClaimed = null;
             var commissionText = "委托状态识别失败";
             try
@@ -201,6 +205,7 @@ public class CheckRewardsTask
                     commissionClaimed = await NewRetry.WaitForElementAppear(
                         GetConfirmRa(true, _dailyRewardsClaimedLocalizedString), null,
                         ct, 4, 500);
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(commissionClaimed == true, "CheckRewardsTask.StartSummaryAsync");
                     commissionText = commissionClaimed == true ? "每日委托奖励：已领取" : "每日委托奖励：未领取";
 
                     using var handbookCapture = CaptureToRectArea();

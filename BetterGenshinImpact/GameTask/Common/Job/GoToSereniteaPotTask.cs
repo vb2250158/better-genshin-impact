@@ -66,6 +66,7 @@ internal class GoToSereniteaPotTask
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "GoToSereniteaPotTask.Start", e is OperationCanceledException);
             Logger.LogDebug(e, "领取尘歌壶奖励异常");
             Logger.LogError("领取尘歌壶奖励异常: {Msg}", e.Message);
         }

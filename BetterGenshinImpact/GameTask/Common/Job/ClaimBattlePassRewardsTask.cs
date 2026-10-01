@@ -44,6 +44,7 @@ public class ClaimBattlePassRewardsTask
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "ClaimBattlePassRewardsTask.Start", e is OperationCanceledException);
             Logger.LogDebug(e, "领取纪行奖励异常");
             Logger.LogError("领取纪行奖励异常: {Msg}", e.Message);
         }

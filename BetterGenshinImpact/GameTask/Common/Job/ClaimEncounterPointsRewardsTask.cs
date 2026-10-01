@@ -41,6 +41,7 @@ public class ClaimEncounterPointsRewardsTask
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "ClaimEncounterPointsRewardsTask.Start", e is OperationCanceledException);
             Logger.LogDebug(e, "领取长效历练点奖励异常");
             Logger.LogError("领取长效历练点奖励异常: {Msg}", e.Message);
         }

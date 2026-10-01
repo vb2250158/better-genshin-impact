@@ -7,6 +7,7 @@ using System.Windows;
 using System.Windows.Threading;
 using BetterGenshinImpact.Core.Recognition.OCR;
 using BetterGenshinImpact.Core.Recognition.ONNX;
+using BetterGenshinImpact.Core.Observation;
 using BetterGenshinImpact.Core.Monitor;
 using BetterGenshinImpact.GameTask;
 using BetterGenshinImpact.GameTask.AutoSkip.Audio;
@@ -77,6 +78,7 @@ public partial class App : Application
                 services.AddSingleton<IRichTextBox>(richTextBox);
 
                 var loggerConfiguration = new LoggerConfiguration()
+                    .WriteTo.Sink(new YeYuObservationSink())
                     .WriteTo.Logger(fileLoggerConfiguration => fileLoggerConfiguration
                         .Enrich.WithProperty("BgiInstance", instanceIdentity)
                         .WriteTo.File(logFile,
@@ -263,6 +265,7 @@ public partial class App : Application
         {
             // 分配控制台窗口以支持控制台输出
             ConsoleHelper.AllocateConsole("BetterGI Console");
+            YeYuObservation.AttachInputObserver();
             RegisterEvents();
             await _host.StartAsync();
             ServerTimeHelper.Initialize(_host.Services.GetRequiredService<IServerTimeProvider>());
@@ -315,6 +318,7 @@ public partial class App : Application
     /// </summary>
     protected override async void OnExit(ExitEventArgs e)
     {
+        YeYuObservation.DrainAsync(TimeSpan.FromSeconds(1)).GetAwaiter().GetResult();
         base.OnExit(e);
 
         ConsoleHelper.WriteLine("BetterGI 应用程序正在关闭...");

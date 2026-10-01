@@ -51,6 +51,7 @@ public class TaskRunner
         var hasLock = await TaskSemaphore.WaitAsync(0);
         if (!hasLock)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.Skipped("task_lock_unavailable", "TaskRunner.RunCurrentAsync");
             _logger.LogError("任务启动失败：当前存在正在运行中的独立任务，请不要重复执行任务！");
             if (clearCancellationContextOnLockFailure)
             {
@@ -74,6 +75,7 @@ public class TaskRunner
         }
         catch (NormalEndException e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.NormalEndObserved(e, "TaskRunner.RunCurrentAsync");
             Notify.Event(NotificationEvent.TaskCancel).Success("任务手动取消，或正常结束");
             _logger.LogInformation("任务中断:{Msg}", e.Message);
             if (RunnerContext.Instance.IsContinuousRunGroup)
@@ -82,8 +84,9 @@ public class TaskRunner
                 throw;
             }
         }
-        catch (OperationCanceledException)
+        catch (OperationCanceledException e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "TaskRunner.RunCurrentAsync", cancelled: true);
             Notify.Event(NotificationEvent.TaskCancel).Success("任务被手动取消");
             _logger.LogInformation("任务中断:{Msg}", "任务被取消");
             if (RunnerContext.Instance.IsContinuousRunGroup)
@@ -94,6 +97,7 @@ public class TaskRunner
         }
         catch (Exception e)
         {
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "TaskRunner.RunCurrentAsync");
             Notify.Event(NotificationEvent.TaskError).Error("任务执行异常", e);
             _logger.LogError(e.Message);
             _logger.LogDebug(e.StackTrace);

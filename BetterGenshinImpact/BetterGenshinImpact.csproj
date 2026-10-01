@@ -30,6 +30,10 @@
 	</ItemGroup>-->
 
 	<ItemGroup>
+		<AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+			<_Parameter1>YeYuBridgeVersion</_Parameter1>
+			<_Parameter2>0.66.0-yeyu.1</_Parameter2>
+		</AssemblyAttribute>
 		<Resource Include="Resources\Images\*.jpg" />
 		<Resource Include="Resources\Images\Anniversary\*" />
 		<Resource Include="Resources\Images\*.png" />

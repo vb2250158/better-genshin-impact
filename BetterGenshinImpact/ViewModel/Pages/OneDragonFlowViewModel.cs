@@ -644,6 +644,7 @@ public partial class OneDragonFlowViewModel : ViewModel
         {
             if (task is { IsEnabled: true, Action: not null })
             {
+                using var taskObservation = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginTask(task.Id, task.Name);
                 if (ScriptGroupsdefault.Any(defaultSg => defaultSg.Name == task.Name))
                 {
                     _logger.LogInformation($"一条龙任务执行: {finishOneTaskcount++}/{enabledoneTaskCount}");
@@ -678,6 +679,7 @@ public partial class OneDragonFlowViewModel : ViewModel
                     }
                     catch (Exception e)
                     {
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "OneDragonFlowViewModel.OnOneKeyExecute.ScriptGroup");
                         _logger.LogDebug(e, "执行配置组任务时失败");
                         Toast.Error("执行配置组任务时失败");
                     }
@@ -685,6 +687,7 @@ public partial class OneDragonFlowViewModel : ViewModel
                 // 如果任务已经被取消，中断所有任务
                 if (CancellationContext.Instance.Cts.IsCancellationRequested)
                 {
+                    BetterGenshinImpact.Core.Observation.YeYuObservation.CancellationObserved("OneDragonFlowViewModel.OnOneKeyExecute");
                     _logger.LogInformation("任务被取消，退出执行");
                     if (CancellationContext.Instance.IsManualStop is false)
                     {
@@ -698,6 +701,7 @@ public partial class OneDragonFlowViewModel : ViewModel
         // 检查和最终结束的任务
         await new TaskRunner().RunThreadAsync(async () =>
         {
+            using var rewardObservation = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginTask("@check-rewards", "检查奖励并通知的任务");
             await new CheckRewardsTask().Start(CancellationContext.Instance.Cts.Token);
             await Task.Delay(500);
             if (CancellationContext.Instance.IsManualStop is false)

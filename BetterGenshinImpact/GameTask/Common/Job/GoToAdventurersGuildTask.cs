@@ -63,6 +63,7 @@ public class GoToAdventurersGuildTask
             }
             catch (Exception e)
             {
+                BetterGenshinImpact.Core.Observation.YeYuObservation.ExceptionObserved(e, "GoToAdventurersGuildTask.Start", e is OperationCanceledException);
                 Logger.LogError("前往冒险家协会领取奖励执行异常：" + e.Message);
                 if (i == _retryTimes - 1)
                 {

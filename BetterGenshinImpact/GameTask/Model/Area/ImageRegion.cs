@@ -239,6 +239,7 @@ public class ImageRegion : Region
             var roi = ownedRoi ?? SrcMat;
 
             var result = OcrFactory.Paddle.OcrResult(roi);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.ObserveOcr(SrcMat, ro, result, effectiveRegionOfInterest);
             var text = StringUtils.RemoveAllSpace(result.Text);
             text = ApplyTextReplacements(text, ro.ReplaceDictionary);
 

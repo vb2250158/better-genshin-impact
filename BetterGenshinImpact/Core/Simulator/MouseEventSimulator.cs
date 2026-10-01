@@ -9,6 +9,7 @@ public class MouseEventSimulator
 {
     public void Move(int x, int y)
     {
+        BetterGenshinImpact.Core.Observation.YeYuObservation.MouseMoved("mouse_event");
         User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE | User32.MOUSEEVENTF.MOUSEEVENTF_MOVE,
             x * 65535 / PrimaryScreen.WorkingArea.Width, y * 65535 / PrimaryScreen.WorkingArea.Height,
             0, 0);
@@ -16,18 +17,21 @@ public class MouseEventSimulator
 
     public void MoveAbsolute(int x, int y)
     {
+        BetterGenshinImpact.Core.Observation.YeYuObservation.MouseMoved("mouse_event");
         User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_ABSOLUTE | User32.MOUSEEVENTF.MOUSEEVENTF_MOVE,
             x, y, 0, 0);
     }
 
     public void LeftButtonDown()
     {
+        BetterGenshinImpact.Core.Observation.YeYuObservation.MouseDown("mouse_event", "left");
         User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_LEFTDOWN, 0, 0, 0, 0);
     }
 
     public void LeftButtonUp()
     {
         User32.mouse_event(User32.MOUSEEVENTF.MOUSEEVENTF_LEFTUP, 0, 0, 0, 0);
+        BetterGenshinImpact.Core.Observation.YeYuObservation.MouseUp("mouse_event", "left");
     }
 
     public bool Click(int x, int y)
