@@ -1,7 +1,7 @@
-# YeYu official observation bridge v2
+# YeYu official observation bridge v3
 
 Official BetterGI 0.66.0 base: `0af68c28f6b0e714d5304625ce644736d508022e`.
-Optional bridge assembly metadata: `YeYuBridgeVersion=0.66.0-yeyu.2`. The official
+Optional bridge assembly metadata: `YeYuBridgeVersion=0.66.0-yeyu.3`. The official
 Version and InformationalVersion remain 0.66.0. This is a source-built fork under
 the existing GPL-3.0 license; retain LICENSE and corresponding fork source.
 
@@ -59,3 +59,33 @@ write-failure, enabled, mismatch and composite. It validates exact supplied pixe
 hashes, coordinate space, bounded polling, unknown returns, recovered exceptions,
 explicit terminals, UID discovery/mismatch, cancellation, and no action images.
 Generated synthetic images never count as real-game evidence.
+
+## 0.66.0-yeyu.3 observation scope correction
+
+Event and scope schemas remain version 2. This release narrows only the reward
+evidence lifetime in `CheckRewardsTask`: the original commission OCR wait and
+its existing `OfficialRewardResult` stay inside the scope. The original branch,
+notification, delay and return-to-main-UI calls stay in the same order, outside
+that scope. The summary route also closes the scope before its original handbook
+capture and crop. No official result, exception policy, retry or game action is
+changed, and no extra capture, recognition or task is added.
+
+An installed v2 run reported that commission rewards were not claimed. Its later
+480x270 `paimon_menu` template input belonged to returning to the main UI, but
+inherited `daily-commission-reward` and was mislabeled as reward verification
+input. The Manager rejected the evidence; that run did not prove accepted daily
+reward completion. V3 corrects attribution only. It does not retry reward claims,
+change that earlier result or relabel historical artifacts.
+
+`BetterGI.YeYuObservationReplay/test_reward_observation_scope.py` extracts the
+actual `StartOriginalAsync` body and the summary commission try/catch/finally
+section from baseline `5b2d435d668a40d29520702c09142982ed9e429c` and the working
+source, and compiles only a standalone fixture linked to the production observer.
+Sixteen before/after scenarios cover claimed/not-claimed OCR, page-opening failure,
+OCR exceptions/cancellation, initial/final return exceptions and observation write
+failure. Inert doubles preserve and compare official call order, parameters,
+branches and original exception identity; no actual input, capture or notification
+is sent. The baseline reproduces the false reward label on the return template;
+the corrected input is ordinary recognition with no reward phase, while successful
+commission OCR keeps its reward phase. PNG hashes and bridge version consistency
+are checked. This regression is observation evidence, not real-game acceptance.

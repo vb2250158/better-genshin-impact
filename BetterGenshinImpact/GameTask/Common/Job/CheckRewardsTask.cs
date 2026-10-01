@@ -94,11 +94,14 @@ public class CheckRewardsTask
             },ct,4,1000);
 
         // OCR识别每日是否完成
-        using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
-        var done = await NewRetry.WaitForElementAppear(
-            GetConfirmRa(true,_dailyRewardsClaimedLocalizedString),null,
-            ct,4,500);
-        BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(done, "CheckRewardsTask.StartOriginalAsync");
+        bool done;
+        using (var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward"))
+        {
+            done = await NewRetry.WaitForElementAppear(
+                GetConfirmRa(true,_dailyRewardsClaimedLocalizedString),null,
+                ct,4,500);
+            BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(done, "CheckRewardsTask.StartOriginalAsync");
+        }
         if (done)
         {
             Logger.LogInformation("检查每日奖励结果：{Msg}", "今日奖励已领取");
@@ -201,11 +204,13 @@ public class CheckRewardsTask
                 }
                 else
                 {
-                    using var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward");
-                    commissionClaimed = await NewRetry.WaitForElementAppear(
-                        GetConfirmRa(true, _dailyRewardsClaimedLocalizedString), null,
-                        ct, 4, 500);
-                    BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(commissionClaimed == true, "CheckRewardsTask.StartSummaryAsync");
+                    using (var rewardEvidence = BetterGenshinImpact.Core.Observation.YeYuObservation.BeginRewardEvidence("daily-commission-reward"))
+                    {
+                        commissionClaimed = await NewRetry.WaitForElementAppear(
+                            GetConfirmRa(true, _dailyRewardsClaimedLocalizedString), null,
+                            ct, 4, 500);
+                        BetterGenshinImpact.Core.Observation.YeYuObservation.OfficialRewardResult(commissionClaimed == true, "CheckRewardsTask.StartSummaryAsync");
+                    }
                     commissionText = commissionClaimed == true ? "每日委托奖励：已领取" : "每日委托奖励：未领取";
 
                     using var handbookCapture = CaptureToRectArea();

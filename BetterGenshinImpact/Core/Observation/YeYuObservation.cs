@@ -39,7 +39,7 @@ public static class YeYuObservation
 
     // ABI compatibility: v2 deliberately installs no input observer.
     public static void AttachInputObserver() => Write("observer_started", new {
-        observationVersion = "0.66.0-yeyu.2", capturePolicy = "official_recognition_input_only",
+        observationVersion = "0.66.0-yeyu.3", capturePolicy = "official_recognition_input_only",
         actionCaptureEnabled = false, delayedCaptureEnabled = false,
         normalImageLimitPerOperation = 2, dedicatedPhaseLimitPerOperation = 6 });
     public static void MouseDown(string source, string button, nint window = 0, int? x = null, int? y = null) { }
@@ -265,7 +265,7 @@ public static class YeYuObservation
     private static JObject Envelope(string type, object data, TaskContextSnapshot? task)
     {
         string? uid; bool identity; lock (IdentityLock) { uid = _observedUid; identity = _identityConfirmed; }
-        return new JObject { ["schemaVersion"] = 2, ["observerVersion"] = "0.66.0-yeyu.2", ["type"] = type, ["eventType"] = type,
+        return new JObject { ["schemaVersion"] = 2, ["observerVersion"] = "0.66.0-yeyu.3", ["type"] = type, ["eventType"] = type,
             ["observedAtUtc"] = DateTimeOffset.UtcNow, ["processId"] = Environment.ProcessId,
             ["runId"] = State!.Scope["runId"], ["runAttemptId"] = State.Scope["runAttemptId"], ["accountId"] = State.Scope["accountId"],
             ["gameDay"] = State.Scope["gameDay"], ["gameId"] = "Genshin", ["accountIdentityConfirmed"] = identity, ["observedUid"] = uid,
